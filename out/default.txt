@@ -1,0 +1,2 @@
+Parameters: 32,715,210
+Epoch (1/156) Train 13.09% 	Validation 15.0%
