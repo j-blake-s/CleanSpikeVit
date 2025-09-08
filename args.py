@@ -3,17 +3,25 @@ def parse_args():
     parser = argparse.ArgumentParser(description='PyTorch Classification Training')
 
     # My Args #
-
-    parser.add_argument('--file', type=str, default='out/default.txt', help='File to save model training results too')
-    parser.add_argument('--T', default=16, type=int, help='simulation steps')
     parser.add_argument('--model', default=None, type=str, help='model or config file')
+    parser.add_argument('--epochs', type=int, default=146, metavar='N',
+                        help='number of epochs to train (default: 2)')
+    parser.add_argument('--device', default='cuda:1', help='device')
     parser.add_argument('--heads', type=int, default=1, help='Number of heads for multi-headed attention')
+    parser.add_argument('--file', type=str, default='out/default.txt', help='File to save model training results too')
+    
+    
+    
+    parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
+                    help='learning rate (default: 5e-4)')
+    parser.add_argument('--warmup-lr', type=float, default=1e-5, metavar='LR',
+                    help='warmup learning rate (default: 1e-6)')
+    parser.add_argument('--T', default=16, type=int, help='simulation steps')
 
     parser.add_argument('--dataset', default='cifar10dvs', help='dataset')
     parser.add_argument('--data-path', default='/data/SpikeJelly/cifar10dvs/', help='dataset')
     parser.add_argument('--classes', type=int, default=10, metavar='N',
                         help='number of label classes (default: 1000)')
-    parser.add_argument('--device', default='cuda:1', help='device')
     parser.add_argument('-b', '--batch-size', default=16, type=int)
 
     parser.add_argument('-j', '--workers', default=1, type=int, metavar='N',
@@ -55,8 +63,7 @@ def parse_args():
     #Learning rate scheduler
     parser.add_argument('--sched', default='cosine', type=str, metavar='SCHEDULER',
                         help='LR scheduler (default: "cosine"')
-    parser.add_argument('--lr', type=float, default=1e-3, metavar='LR',
-                        help='learning rate (default: 5e-4)')
+
     parser.add_argument('--lr-noise', type=float, nargs='+', default=None, metavar='pct, pct',
                         help='learning rate noise on/off epoch percentages')
     parser.add_argument('--lr-noise-pct', type=float, default=0.67, metavar='PERCENT',
@@ -67,12 +74,10 @@ def parse_args():
                         help='learning rate cycle len multiplier (default: 1.0)')
     parser.add_argument('--lr-cycle-limit', type=int, default=1, metavar='N',
                         help='learning rate cycle limit')
-    parser.add_argument('--warmup-lr', type=float, default=1e-5, metavar='LR',
-                        help='warmup learning rate (default: 1e-6)')
+
     parser.add_argument('--min-lr', type=float, default=1e-5, metavar='LR',
                         help='lower lr bound for cyclic schedulers that hit 0 (1e-5)')
-    parser.add_argument('--epochs', type=int, default=146, metavar='N',
-                        help='number of epochs to train (default: 2)')
+
     parser.add_argument('--epoch-repeats', type=float, default=0., metavar='N',
                         help='epoch repeat multiplier (number of times to repeat dataset epoch per train epoch).')
     parser.add_argument('--start-epoch', default=0, type=int, metavar='N',

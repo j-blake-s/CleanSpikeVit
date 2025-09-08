@@ -1,2 +1,3 @@
-Parameters: 32,715,210
-Epoch (1/156) Train 13.09% 	Validation 15.0%
+Parameters: 21,070,378
+         	|     Train     |      Test     |
+         	| Top-1 | Top-3 | Top-1 | Top-3 |

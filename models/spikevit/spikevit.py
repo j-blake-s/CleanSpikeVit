@@ -21,7 +21,7 @@ class GAP(nn.Module):
     return x_k_v / (H*W)
 
 class Head(nn.Module):
-  def __init__(self, in_channels, out_channels, embed_dim, tokens):
+  def __init__(self, in_channels, out_channels, embed_dim):
     super().__init__()
     
     self.pool = GAP()
@@ -67,18 +67,24 @@ class SpikeBlock(nn.Module):
                               padding=padding)
     self.to_mobile = ToMobileBridge(in_channels=out_channels, embed_dim=embed_dim)
   
+    self._layers = [self.to_former,self.former, self.mobile, self.to_mobile]
+    self._names = ["To Former Bridge", "Former", "Mobile", "To Mobile Bridge"]
+
   def forward(self, x, tokens):
 
     # Former
     tokens = self.to_former(x, tokens)
-    tokens =self.former(tokens)
+    tokens = self.former(tokens)
 
     # Mobile
     x = self.mobile(x)
     x = self.to_mobile(x, tokens)
 
     return x, tokens
-
+  def parameter_breakdown(self):
+    for l,n in zip(self._layers, self._names):
+      print(f'\t{n}', f'{sum(p.numel() for p in l.parameters() if p.requires_grad):,}' )
+      
 class Stem(nn.Module):
   def __init__(self, in_channels, hidden_channels, out_channels, stride, kernel_size, padding):
     super().__init__()
@@ -89,14 +95,15 @@ class Stem(nn.Module):
                           stride=stride,
                           padding=padding)
 
-    self.bneck = SpikeBottleneck(in_channels=out_channels,
-                                 hidden_channels=hidden_channels,
-                                 out_channels=out_channels,
-                                 kernel_size=kernel_size,
-                                 padding=padding)
+    # self.bneck = SpikeBottleneck(in_channels=out_channels,
+    #                              hidden_channels=hidden_channels,
+    #                              out_channels=out_channels,
+    #                              kernel_size=kernel_size,
+    #                              padding=padding)
   
   def forward(self, x):
-    return self.bneck(self.conv(x))
+    return self.conv(x)
+    # return self.bneck(self.conv(x))
 
 class SpikeViT(nn.Module):
   def __init__(self, 
@@ -142,9 +149,11 @@ class SpikeViT(nn.Module):
     
     self.head = Head(in_channels=config.CHANNEL_CONV.OUT_CHANNELS,
                      out_channels=args.classes,
-                     embed_dim=D,
-                     tokens=M)
+                     embed_dim=D)
     
+    self._layers = [self.stem, self.blocks, self.end_former_bridge, self.channel_conv, self.head]
+    self._names = ["Stem","Spike Block","End Former Bridge", "Channel Conv", "Head"]
+
   def _token(self, M, D, T):
 
     # Token Shape
@@ -183,7 +192,15 @@ class SpikeViT(nn.Module):
     x = self.channel_conv(x)
 
     return self.head(x, tokens)
-    
+  
+  def parameter_breakdown(self):
+    for l,n in zip(self._layers, self._names):
+      if type(l) == type(nn.ModuleList([])):
+        for i, ll in enumerate(l):
+          print(f'{n} {i+1}', f'{sum(p.numel() for p in ll.parameters() if p.requires_grad):,}' )
+          ll.parameter_breakdown()
+      else:    
+        print(n, f'{sum(p.numel() for p in l.parameters() if p.requires_grad):,}' )
 
 
 

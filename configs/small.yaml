@@ -1,0 +1,20 @@
+TOKENS: [6, 384]
+
+STEM:
+  OUT_CHANNELS: 48
+  HIDDEN_CHANNELS: 96
+
+
+
+BLOCK:
+  IN_CHANNELS:     [ 48,  96, 192]
+  HIDDEN_CHANNELS: [128, 256, 512]
+  OUT_CHANNELS:    [ 96, 192, 384]
+  MLP_RATIO:       [  6,   6,   6]
+  STRIDE:          [  4,   4,   2]
+  KERNEL_SIZE:     [  5,   5,   3]
+  PADDING    :     [  2,   2,   1]
+
+
+CHANNEL_CONV:
+  OUT_CHANNELS: 1024

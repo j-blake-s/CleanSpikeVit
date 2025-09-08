@@ -13,12 +13,12 @@ from args import parse_args
 from train import train_one_epoch, evaluate
 
 ## Set Seed ##
-_seed_ = 2021
-random.seed(2021)
-torch.manual_seed(_seed_)  # use torch.manual_seed() to seed the RNG for all devices (both CPU and CUDA)
-torch.cuda.manual_seed_all(_seed_)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
+# _seed_ = 2021
+# random.seed(2021)
+# torch.manual_seed(_seed_)  # use torch.manual_seed() to seed the RNG for all devices (both CPU and CUDA)
+# torch.cuda.manual_seed_all(_seed_)
+# torch.backends.cudnn.deterministic = True
+# torch.backends.cudnn.benchmark = False
 
 root_path = os.path.abspath(__file__)
 

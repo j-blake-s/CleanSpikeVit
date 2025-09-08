@@ -67,24 +67,38 @@ class SpikeMobile(nn.Module):
   def __init__(self, in_channels, hidden_channels, out_channels, kernel_size, stride, padding):
     super().__init__()
 
-    self.downsample = False
-    if stride > 1:
-      self.downsample = True     
-      self.conv = SpikeConv(in_channels=in_channels,
-                            out_channels=in_channels,
-                            kernel_size=kernel_size,
-                            stride=stride,
-                            padding=padding) 
+    self.conv = SpikeConv(in_channels=in_channels,
+                          out_channels=out_channels,
+                          kernel_size=kernel_size,
+                          stride=stride,
+                          padding=padding) 
     
-    self.bneck = SpikeBottleneck(in_channels=in_channels,
-                                  hidden_channels=hidden_channels,
-                                  out_channels=out_channels,
-                                  kernel_size=kernel_size,
-                                  padding=padding)
-
   def forward(self, x):
-    if self.downsample: x = self.conv(x)
-    return self.bneck(x)
+    return self.conv(x)
+
+    
+# class SpikeMobile(nn.Module):
+#   def __init__(self, in_channels, hidden_channels, out_channels, kernel_size, stride, padding):
+#     super().__init__()
+
+#     self.downsample = False
+#     if stride > 1:
+#       self.downsample = True     
+#       self.conv = SpikeConv(in_channels=in_channels,
+#                             out_channels=in_channels,
+#                             kernel_size=kernel_size,
+#                             stride=stride,
+#                             padding=padding) 
+    
+#     self.bneck = SpikeBottleneck(in_channels=in_channels,
+#                                   hidden_channels=hidden_channels,
+#                                   out_channels=out_channels,
+#                                   kernel_size=kernel_size,
+#                                   padding=padding)
+
+#   def forward(self, x):
+#     if self.downsample: x = self.conv(x)
+#     return self.bneck(x)
 
 class SpikeFormer(nn.Module):
   def __init__(self, embed_dim, mlp_ratio, heads):
