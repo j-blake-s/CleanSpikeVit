@@ -6,7 +6,7 @@ import utils
 
 aug = transforms.Compose([transforms.RandomHorizontalFlip(p=0.5)])
 train_aug = autoaugment.SNNAugmentWide()
-def train_one_epoch(model, criterion, optimizer, data_loader, device):
+def train_one_epoch(model, criterion, optimizer, data_loader, device, mixup_fn=None):
   model.train()
   global_acc1 = 0.0
   global_acc3 = 0.0
@@ -21,6 +21,11 @@ def train_one_epoch(model, criterion, optimizer, data_loader, device):
     images = torch.stack([(aug(images[i])) for i in range(B)])
     images = torch.stack([(train_aug(images[i])) for i in range(B)])
 
+    if mixup_fn is not None:
+        images, labels = mixup_fn(images, labels)
+        target_for_compu_acc = labels.argmax(dim=-1)
+
+
     output = model(images)
     loss = criterion(output, labels)
     optimizer.zero_grad()
@@ -28,8 +33,12 @@ def train_one_epoch(model, criterion, optimizer, data_loader, device):
     optimizer.step()
 
     functional.reset_net(model)
-
-    acc1, acc3 = utils.accuracy(output, labels, topk=(1, 3))
+    
+    if mixup_fn is not None:
+        acc1, acc3 = utils.accuracy(output, target_for_compu_acc, topk=(1, 3))
+    else:
+        acc1, acc3 = utils.accuracy(output, labels, topk=(1, 3))
+    
 
     global_acc1 += acc1.item()
     global_acc3 += acc3.item()

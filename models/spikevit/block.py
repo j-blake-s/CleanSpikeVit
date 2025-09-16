@@ -133,6 +133,8 @@ class SpikeAttention(nn.Module):
     self.output = SpikeDense(in_channels=embed_dim,
                              out_channels=embed_dim)
     
+    self.scale = nn.Parameter(torch.Tensor([0.25,]))
+    
   def forward(self, tokens):
     
     # Initial Shape
@@ -147,7 +149,8 @@ class SpikeAttention(nn.Module):
 
     # Matrix Multiplication
     q_k = torch.matmul(q, k.transpose(3,4)) # T B h M M
-    q_k_v = torch.matmul(q_k, v) # T B h M d
+    # q_k_v = torch.matmul(q_k, v) # T B h M d
+    q_k_v = torch.matmul(q_k, v) * self.scale # T B h M d
 
     # Concatanate Multi Heads
     tokens = q_k_v.transpose(3,4).reshape(tokens.shape) # T B D M

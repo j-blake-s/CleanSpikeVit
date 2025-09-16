@@ -94,12 +94,10 @@ def parse_args():
                         help='LR decay rate (default: 0.1)')
 
     # Augmentation & regularization parameters
-    parser.add_argument('--smoothing', type=float, default=0.1,
-                        help='Label smoothing (default: 0.1)')
     parser.add_argument('--mixup', type=float, default=0.5,
-                        help='mixup alpha, mixup enabled if > 0. (default: 0.)')
+                    help='mixup alpha, mixup enabled if > 0. (default: 0.)')
     parser.add_argument('--cutmix', type=float, default=0.,
-                        help='cutmix alpha, cutmix enabled if > 0. (default: 0.)')
+                    help='cutmix alpha, cutmix enabled if > 0. (default: 0.)')
     parser.add_argument('--cutmix-minmax', type=float, nargs='+', default=None,
                         help='cutmix min/max ratio, overrides alpha and enables cutmix if set (default: None)')
     parser.add_argument('--mixup-prob', type=float, default=0.5,
@@ -108,6 +106,8 @@ def parse_args():
                         help='Probability of switching to cutmix when both mixup and cutmix enabled')
     parser.add_argument('--mixup-mode', type=str, default='batch',
                         help='How to apply mixup/cutmix params. Per "batch", "pair", or "elem"')
+    parser.add_argument('--smoothing', type=float, default=0.1,
+                        help='Label smoothing (default: 0.1)')
     parser.add_argument('--mixup-off-epoch', default=0, type=int, metavar='N',
                         help='Turn off mixup after this epoch, disabled if 0 (default: 0)')
     args = parser.parse_args()

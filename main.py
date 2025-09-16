@@ -4,6 +4,7 @@ import torch
 import random
 from torch import nn
 import torch.utils.data
+from timm.data import Mixup
 from timm.optim import create_optimizer
 from timm.scheduler import create_scheduler
 
@@ -13,12 +14,12 @@ from args import parse_args
 from train import train_one_epoch, evaluate
 
 ## Set Seed ##
-# _seed_ = 2021
-# random.seed(2021)
-# torch.manual_seed(_seed_)  # use torch.manual_seed() to seed the RNG for all devices (both CPU and CUDA)
-# torch.cuda.manual_seed_all(_seed_)
-# torch.backends.cudnn.deterministic = True
-# torch.backends.cudnn.benchmark = False
+_seed_ = 2021
+random.seed(2021)
+torch.manual_seed(_seed_)  # use torch.manual_seed() to seed the RNG for all devices (both CPU and CUDA)
+torch.cuda.manual_seed_all(_seed_)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
 
 root_path = os.path.abspath(__file__)
 
@@ -54,14 +55,24 @@ with open(args.file, 'w') as f:
   f.write(f'         \t|     Train     |      Test     |\n')
   f.write(f'         \t| Top-1 | Top-3 | Top-1 | Top-3 |\n')
 
-## Training
+## Training ##
+mixup_fn = None
+mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
+if mixup_active:
+    mixup_args = dict(
+        mixup_alpha=args.mixup, cutmix_alpha=args.cutmix, cutmix_minmax=args.cutmix_minmax,
+        prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
+        label_smoothing=args.smoothing, num_classes=args.classes)
+    mixup_fn = Mixup(**mixup_args)
+
 optimizer = create_optimizer(args, model)
 criterion = nn.CrossEntropyLoss().to(args.device)
 lr_scheduler, num_epochs = create_scheduler(args, optimizer)
 print(f'         \t|     Train     |      Test     |')
 print(f'         \t| Top-1 | Top-3 | Top-1 | Top-3 |')
 for epoch in range(args.start_epoch, num_epochs):
-  train_acc1, train_acc3 = train_one_epoch(model, criterion, optimizer, train_loader, args.device)
+  if epoch >= 250 and mixup_fn is not None: mixup_fn.mixup_enabled = False
+  train_acc1, train_acc3 = train_one_epoch(model, criterion, optimizer, train_loader, args.device, mixup_fn=mixup_fn)
   lr_scheduler.step(epoch + 1)
   test_acc1, test_acc3 = evaluate(model, test_loader, args.device)
   print(f'[{epoch+1}/{num_epochs}] \t| {format(round(train_acc1,2))} | {format(round(train_acc3,2))} | {format(round(test_acc1,2))} | {format(round(test_acc3,2))} |')
